@@ -1,0 +1,14 @@
+            clearInterval(timerInterval);
+            isRunning = false;
+            elapsedTime = 0;
+            lapCount = 0;
+            display.textContent = '00:00:00.00';
+            lapsContainer.innerHTML = '';
+            
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+            lapBtn.disabled = true;
+        });
+    </script>
+</body>
+</html>
