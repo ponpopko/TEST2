@@ -1,3 +1,220 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ストップウォッチ</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .container {
+            background: white;
+            padding: 3rem;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            min-width: 350px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 2rem;
+            font-size: 2rem;
+        }
+
+        .display {
+            font-size: 4rem;
+            font-weight: bold;
+            color: #667eea;
+            margin: 2rem 0;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 2px;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .start {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .start:hover {
+            background: #45a049;
+        }
+
+        .stop {
+            background: #f44336;
+            color: white;
+        }
+
+        .stop:hover {
+            background: #da190b;
+        }
+
+        .reset {
+            background: #2196F3;
+            color: white;
+        }
+
+        .reset:hover {
+            background: #0b7dda;
+        }
+
+        .lap {
+            background: #FF9800;
+            color: white;
+        }
+
+        .lap:hover {
+            background: #e68900;
+        }
+
+        .laps {
+            margin-top: 2rem;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .lap-time {
+            background: #f5f5f5;
+            padding: 0.8rem;
+            margin: 0.5rem 0;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .lap-number {
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .lap-value {
+            font-family: 'Courier New', monospace;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⏱️ ストップウォッチ</h1>
+        <div class="display" id="display">00:00:00.00</div>
+        <div class="buttons">
+            <button class="start" id="startBtn">開始</button>
+            <button class="stop" id="stopBtn" disabled>停止</button>
+            <button class="lap" id="lapBtn" disabled>ラップ</button>
+            <button class="reset" id="resetBtn">リセット</button>
+        </div>
+        <div class="laps" id="laps"></div>
+    </div>
+
+    <script>
+        let startTime = 0;
+        let elapsedTime = 0;
+        let timerInterval = null;
+        let isRunning = false;
+        let lapCount = 0;
+
+        const display = document.getElementById('display');
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const lapBtn = document.getElementById('lapBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const lapsContainer = document.getElementById('laps');
+
+        function formatTime(ms) {
+            const totalSeconds = Math.floor(ms / 1000);
+            const hours = Math.floor(totalSeconds / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const seconds = totalSeconds % 60;
+            const milliseconds = Math.floor((ms % 1000) / 10);
+
+            return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}.${String(milliseconds).padStart(2, '0')}`;
+        }
+
+        function updateDisplay() {
+            const currentTime = Date.now();
+            elapsedTime = currentTime - startTime;
+            display.textContent = formatTime(elapsedTime);
+        }
+
+        startBtn.addEventListener('click', () => {
+            if (!isRunning) {
+                startTime = Date.now() - elapsedTime;
+                timerInterval = setInterval(updateDisplay, 10);
+                isRunning = true;
+                
+                startBtn.disabled = true;
+                stopBtn.disabled = false;
+                lapBtn.disabled = false;
+            }
+        });
+
+        stopBtn.addEventListener('click', () => {
+            if (isRunning) {
+                clearInterval(timerInterval);
+                isRunning = false;
+                
+                startBtn.disabled = false;
+                stopBtn.disabled = true;
+                lapBtn.disabled = true;
+            }
+        });
+
+        lapBtn.addEventListener('click', () => {
+            if (isRunning) {
+                lapCount++;
+                const lapTime = document.createElement('div');
+                lapTime.className = 'lap-time';
+                lapTime.innerHTML = `
+                    <span class="lap-number">ラップ ${lapCount}</span>
+                    <span class="lap-value">${formatTime(elapsedTime)}</span>
+                `;
+                lapsContainer.insertBefore(lapTime, lapsContainer.firstChild);
+            }
+        });
+
+        resetBtn.addEventListener('click', () => {
             clearInterval(timerInterval);
             isRunning = false;
             elapsedTime = 0;
